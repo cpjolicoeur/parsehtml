@@ -385,6 +385,26 @@ class ParseHTML #:nodoc:
     while (parser.next_node)
       parser.normalize_node if (parser.node_type == 'tag')
       if (parser.node_type == 'tag' && parser.is_block_element)
+        is_pre_or_code = ['code', 'pre'].include?(parser.tag_name)
+        if(!parser.keep_whitespace && !last && !is_pre_or_code)
+          html = html.rstrip + "\n"
+        end
+        if (parser.is_start_tag)
+          html << indent_a.join(' ')
+          if (!parser.is_empty_tag)
+            indent_a << indent
+          end
+        else
+          indent_a.pop
+          if (!is_pre_or_code)
+            html << indent_a.join(' ')
+          end
+        end
+        html << parser.node
+        if (!parser.keep_whitespace && !(is_pre_or_code && parser.is_start_tag))
+          html << "\n"
+        end
+        last = true
       else
         if (parser.node_type == 'tag' && parser.tag_name == 'br')
           html << (parser.node + "\n")
