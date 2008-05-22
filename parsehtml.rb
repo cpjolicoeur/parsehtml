@@ -204,7 +204,7 @@ class ParseHTML #:nodoc:
     
     @skip_whitespace = false if @keep_whitespace
     
-    # when we get here it seems to be a text mode
+    # when we get here it seems to be a text node
     pos = @html.index('<')
     pos = @html.size if pos.nil?
     
