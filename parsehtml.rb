@@ -1,4 +1,4 @@
-class parseHTML #:nodoc:
+class ParseHTML #:nodoc:
   
   # tags which are always empty (<br />, etc.)
   EMPTY_TAGS = %w(br hr input img)
