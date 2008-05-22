@@ -99,49 +99,49 @@ class ParseHTML #:nodoc:
   # - comment
   # - doctype
   # - pi (processing instruction)
+  @node_type = ''
   attr_accessor :node_type
   
   # current node context
   # - either a simple string (text node) or something like
   # - <tag attrib="value"...>
+  @node = ''
   attr_reader :node
   
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
   # - NOTE: empty tags (<br />) set this to true as well!
+  @is_start_tag = nil
   attr_reader :is_start_tag
   
   # whether current node is an empty tag (<br />) or not (<a></a>)
+  @is_empty_tag = nil
   attr_reader :is_empty_tag
   
   # tag name
+  @tag_name = ''
   attr_reader :tag_name
   
   # attributes of current_tag (in hash)
+  @tag_attributes = nil
   attr_reader :tag_attributes
   
   # whether the current tag is a block level element
+  @is_block_element = nil
   attr_reader :is_block_element
   
   # keep whitespace formatting
+  @keep_whitespace = 0
   attr_reader :keep_whitespace
   
   # list of open tags (array)
   # - count this to get current depth
+  @open_tags = []
   attr_accessor :open_tags
   
 
   def initialize(html = '')
     @html = html
-    @open_tags = []
-    @keep_whitespace = 0
-    @is_block_element = nil
-    @tag_attributes = nil
-    @tag_name = ''
-    @is_empty_tag = nil
-    @is_start_tag = nil
-    @node = ''
-    @node_type ''
   end
   
   # get next node
@@ -162,9 +162,172 @@ class ParseHTML #:nodoc:
         pos = @html.index('>')
         set_node('pi', pos+1)
         return true;
-      end
+      end # end pi tag
+      if (token[0,4] == '<!--')
+        # HTML comment
+        pos = @html.index('-->')
+        if pos.nil?
+          # could not find a closing -->, use next < tag instead
+          # this is what firefox does with its parsing
+          pos = @html.index('>') + 1
+        else
+          pos += 3
+        end
+        set_node('comment', pos)
+        return true
+      end # end comment tag
+      if (token == '<!DOCTYPE')
+        # doctype
+        set_node('doctype', @html.index('>')+1)
+        @skip_whitespace = true
+        return true
+      end # end <!DOCTYPE tag
+      if (token == '<![CDATA[')
+        # cdata, use text mode
+        
+        # remove leading <![CDATA[
+        @html = @html(9, @html.size-9)
+        set_node('text', @html.index(']]>')+3)
+        
+        # remove trailing ]]> and trim
+        @node = @node(0, -3)
+        handle_whitespaces
+        
+        @skip_whitespace = true
+        return true
+      end # end cdata
+      if (parse_tag)
+        # seems to be a tag so handle whitespaces
+        @skip_whitespace = @is_block_element
+      end # end parse_tag
     end
+    
+    @skip_whitespace = false if @keep_whitespace
+    
+    # when we get here it seems to be a text mode
+    pos = @html.index('<')
+    pos = @html.size if pos.nil?
+    
+    set_node('text', pos)
+    handle_whitespaces
+    return next_node if (@skip_whitespace && @node == ' ')
+    @skip_whitespace = false
+    return true
   end # end next_node
+  
+  # parse tag, set tag name and attributes, check for closing tag, etc...
+  def parse_tag
+    a_ord = 'a'[0] # a ascii value
+    z_ord = 'z'[0] # z ascii value
+    tag_name = ''
+    pos = 1
+    is_start_tag = (@html[pos,1] != '/')
+    pos += 1 if is_start_tag
+    
+    # get tag name
+    while (@html[pos,1])
+      char = @html.downcase[pos,1]
+      pos_ord = char[0]
+      if ((pos_ord >= a_ord && pos_ord <= z_ord) || (tag_name.empty? && char.is_numeric?))
+        tag_name << char
+        pos += 1
+      else
+        pos -= 1
+        break
+      end
+    end # end while
+    
+    tag_name = tag_name.downcase
+    
+    if (tag_name.empty? || !BLOCK_ELEMENTS.include?(tag_name))
+      # something went wrong, invalid tag
+      invalid_tag
+      return false
+    end
+    
+    # get tag attributes
+    is_empty_tag = false
+    attributes = {}
+    curr_attribute = ''
+    while (@html(pos+1,1]))
+      pos += 1
+      # close tag
+      if (@html[pos,1] == '>' || @html[pos,2] == '/>')
+        if (@html[pos,1] == '/')
+          @is_empty_tag = true
+          pos += 1
+        end
+        break 
+      end
+
+      char = @html.downcase[pos,1]
+      pos_ord = char[0]
+      if (pos_ord >= a_ord && pos_ord <= z_ord)
+        # attribute name
+        curr_attribute << char
+      elsif ([' ', "\t", "\n"].include?(char))
+        # drop whitespace
+      elsif
+        # get attribute value
+        pos += 1
+        await = @html[pos,1] # single or double quote
+        pos += 1
+        value = ''
+        while (@html[pos,1] && @html[pos,1] != await)
+          value << @html[pos,1]
+          pos += 1
+        end # end while
+        attributes[curr_attribute] = value
+        curr_attribute = ''
+      else
+        invalid_tag
+        return false
+      end
+    end # end while
+    
+    if (@html[pos] != '>')
+      invalid_tag
+      return false
+    end
+    
+    if (!curr_attribute.empty?)
+      # html4 allows something like <option selected> instead of <option selected="selected">
+      attributes[curr_attribute] = curr_attribute
+    end
+    
+    unless (@is_start_tag)
+      if (!attributes.empty? || (tag_name != @open_tags.last))
+        # end tags must not contain any attributes
+        # or maybe we did not expect a different tag to be closed
+        invalid_tag
+        return false
+      end
+      @open_tags.pop
+      if (PREFORMATTED_TAGS.include?(tag_name))
+        @keep_whitespace -= 1
+      end
+    end 
+    pos += 1
+    @node = @html[0,pos]
+    @html = @html[pos, @html.size-pos]
+    @tag_name = tag_name
+    @tag_attributes = attributes
+    @is_start_tag = is_start_tag
+    @is_empty_tag = is_empty_tag || @empty_tags.include?(tag_name)
+    if (@is_empty_tag)
+      # might not be well formed
+      @node.gsub!(//, ' />')
+    end
+    @node_type = 'tag'
+    @is_block_element = BLOCK_ELEMENTS[tag_name]
+    return true
+  end
+  
+  # handle invalid tags
+  def invalid_tag
+    @html = '&lt;' + @html.slice(1, @html.size - 1)
+    return @html
+  end
   
   # update all variables and make @html shorter
   # - param type => @nodeType
@@ -185,4 +348,68 @@ class ParseHTML #:nodoc:
     @html = @html[pos, @html.size-pos]
   end # end set_node
   
+  # check if @html begins with a specific string
+  def match?(str)
+    @html.slice(0, str.size) == str
+  end
+  
+  # truncate whitespaces
+  def handle_whitespaces
+    return if @keep_whitespace.zero?
+    @node.gsub!(/\s+/, ' ')
+  end
+  
+  # normalize self::node
+  def normalize_node
+    @node = '<'
+    if (@is_start_tag)
+      @node << "/#{@tag_name}>"
+      return
+    end
+    @node << @tag_name
+    @tag_attributes.each do |name, value|
+      str = ' ' + name + '="' + value.gsub(/\"/, '&quot;') + '"'
+      @node << str
+    end
+    @node << ' /' if (@is_empty_tag)
+    @node << '>'
+  end
+  
+  # indent HTML properly
+  def indent_html(html, indent = '  ')
+    parser = ParseHTML.new(html)
+    html = ''
+    last = true # last tag was block element
+    indent_a = []
+    
+    while (parser.next_node)
+      parser.normalize_node if (parser.node_type == 'tag')
+      if (parser.node_type == 'tag' && parser.is_block_element)
+      else
+        if (parser.node_type == 'tag' && parser.tag_name == 'br')
+          html << (parser.node + "\n")
+          last = true
+          continue
+        elsif (last && !parser.keep_whitespace)
+          html << indent_a.join(' ')
+          parser.node = lstrip(parser.node)
+        end
+        html << parser.node
+        
+        if (['comment', 'pi', 'doctype'].include?(parser.node_type))
+          html << "\n"
+        else
+          last = false
+        end
+      end
+    end # end while
+    return html
+  end
+  
 end # end class
+
+class String
+  def is_numeric?
+    Float self rescue false
+  end
+end
