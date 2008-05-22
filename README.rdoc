@@ -7,15 +7,15 @@ parseHTML will parse HTML in Ruby and even tries to handle invalid HTML to some 
 
 == Requirements
 
-All you need is Ruby.
+All you need is Ruby 1.8 or above.
 
 == Get it
 
-Available as a gem on GitHub:
+Available as a gem on GitHub: coming soon
 
-Or download from:
+Or download gem from: coming soon
 
-Or get the source:
+Or get the source: http://github.com/cpjolicoeur/parsehtml
 
 
 == Features
