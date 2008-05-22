@@ -106,7 +106,7 @@ class ParseHTML #:nodoc:
   # - either a simple string (text node) or something like
   # - <tag attrib="value"...>
   @node = ''
-  attr_reader :node
+  attr_accessor :node
   
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
@@ -146,7 +146,7 @@ class ParseHTML #:nodoc:
   
   # get next node
   def next_node
-    return false if @html.blank?
+    return false if (@html.nil? || @html.empty?)
 
     skip_whitespace = true
     if (@is_start_tag && !@is_empty_tag)
@@ -186,11 +186,11 @@ class ParseHTML #:nodoc:
         # cdata, use text mode
         
         # remove leading <![CDATA[
-        @html = @html(9, @html.size-9)
+        @html = @html[9, @html.size-9]
         set_node('text', @html.index(']]>')+3)
         
         # remove trailing ]]> and trim
-        @node = @node(0, -3)
+        @node = @node[0, -3]
         handle_whitespaces
         
         @skip_whitespace = true
@@ -249,7 +249,7 @@ class ParseHTML #:nodoc:
     is_empty_tag = false
     attributes = {}
     curr_attribute = ''
-    while (@html(pos+1,1]))
+    while (@html[pos+1,1])
       pos += 1
       # close tag
       if (@html[pos,1] == '>' || @html[pos,2] == '/>')
@@ -355,7 +355,7 @@ class ParseHTML #:nodoc:
   
   # truncate whitespaces
   def handle_whitespaces
-    return if @keep_whitespace.zero?
+    return if (@keep_whitespace.nil? || @keep_whitespace.zero?)
     @node.gsub!(/\s+/, ' ')
   end
   
@@ -376,7 +376,7 @@ class ParseHTML #:nodoc:
   end
   
   # indent HTML properly
-  def indent_html(html, indent = '  ')
+  def self.indent_html(html, indent = '  ')
     parser = ParseHTML.new(html)
     html = ''
     last = true # last tag was block element
@@ -392,7 +392,7 @@ class ParseHTML #:nodoc:
           continue
         elsif (last && !parser.keep_whitespace)
           html << indent_a.join(' ')
-          parser.node = lstrip(parser.node)
+          parser.node = parser.node.lstrip
         end
         html << parser.node
         
