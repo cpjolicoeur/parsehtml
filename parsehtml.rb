@@ -111,11 +111,11 @@ class ParseHTML #:nodoc:
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
   # - NOTE: empty tags (<br />) set this to true as well!
-  @is_start_tag = nil
+  @is_start_tag = false
   attr_reader :is_start_tag
   
   # whether current node is an empty tag (<br />) or not (<a></a>)
-  @is_empty_tag = nil
+  @is_empty_tag = false
   attr_reader :is_empty_tag
   
   # tag name
@@ -127,7 +127,7 @@ class ParseHTML #:nodoc:
   attr_reader :tag_attributes
   
   # whether the current tag is a block level element
-  @is_block_element = nil
+  @is_block_element = false
   attr_reader :is_block_element
   
   # keep whitespace formatting
@@ -136,25 +136,30 @@ class ParseHTML #:nodoc:
   
   # list of open tags (array)
   # - count this to get current depth
-  @open_tags = []
   attr_accessor :open_tags
   
 
   def initialize(html = '')
     @html = html
+    @open_tags = []
+    @loop = 1
   end
   
   # get next node
   def next_node
+    # puts "\n\n* loop: #{@loop}"
     return false if (@html.nil? || @html.empty?)
 
     skip_whitespace = true
+    # puts "  in next node - tag_name: #{@tag_name}"
     if (@is_start_tag && !@is_empty_tag)
       @open_tags << @tag_name
-      @keep_whitespace += 1 if @preformatted_tags.include?(@tag_name)
+      @keep_whitespace += 1 if PREFORMATTED_TAGS.include?(@tag_name)
     end
     
     if (@html[0,1] == '<')
+      # puts "  new token: #{html[0,9]}"
+      # puts "  open tags: #{@open_tags}"
       token = html[0,9]
       if (token[0,2] == '<?')
         # xml, prolog, or other pi's
@@ -197,6 +202,7 @@ class ParseHTML #:nodoc:
         return true
       end # end cdata
       if (parse_tag)
+        # puts "  After parse tag =>tag_name: #{@tag_name}, start_tag: #{@is_start_tag}, empty_tag: #{@is_empty_tag}"
         # seems to be a tag so handle whitespaces
         @skip_whitespace = @is_block_element
       end # end parse_tag
@@ -212,6 +218,7 @@ class ParseHTML #:nodoc:
     handle_whitespaces
     return next_node if (@skip_whitespace && @node == ' ')
     @skip_whitespace = false
+    @loop += 1
     return true
   end # end next_node
   
@@ -222,7 +229,7 @@ class ParseHTML #:nodoc:
     tag_name = ''
     pos = 1
     is_start_tag = (@html[pos,1] != '/')
-    pos += 1 if is_start_tag
+    pos += 1 unless is_start_tag
     
     # get tag name
     while (@html[pos,1])
@@ -238,7 +245,7 @@ class ParseHTML #:nodoc:
     end # end while
     
     tag_name = tag_name.downcase
-    
+
     if (tag_name.empty? || !BLOCK_ELEMENTS.include?(tag_name))
       # something went wrong, invalid tag
       invalid_tag
@@ -285,7 +292,7 @@ class ParseHTML #:nodoc:
       end
     end # end while
     
-    if (@html[pos] != '>')
+    if (@html[pos, 1] != '>')
       invalid_tag
       return false
     end
@@ -295,7 +302,7 @@ class ParseHTML #:nodoc:
       attributes[curr_attribute] = curr_attribute
     end
     
-    unless (@is_start_tag)
+    unless (is_start_tag)
       if (!attributes.empty? || (tag_name != @open_tags.last))
         # end tags must not contain any attributes
         # or maybe we did not expect a different tag to be closed
@@ -311,12 +318,13 @@ class ParseHTML #:nodoc:
     @node = @html[0,pos]
     @html = @html[pos, @html.size-pos]
     @tag_name = tag_name
+    # puts "  -- just set @tag_name: #{@tag_name}"
     @tag_attributes = attributes
     @is_start_tag = is_start_tag
-    @is_empty_tag = is_empty_tag || @empty_tags.include?(tag_name)
+    @is_empty_tag = is_empty_tag || EMPTY_TAGS.include?(tag_name)
     if (@is_empty_tag)
       # might not be well formed
-      @node.gsub!(//, ' />')
+      @node.gsub!(/ *\/? *>$/, ' />')
     end
     @node_type = 'tag'
     @is_block_element = BLOCK_ELEMENTS[tag_name]
@@ -325,6 +333,8 @@ class ParseHTML #:nodoc:
   
   # handle invalid tags
   def invalid_tag
+    raise "INVALID TAG"
+    # puts "INVALID TAG: node: #{@node}"
     @html = '&lt;' + @html.slice(1, @html.size - 1)
     return @html
   end
@@ -333,19 +343,22 @@ class ParseHTML #:nodoc:
   # - param type => @nodeType
   # - param pos  => which position to cut at
   def set_node(type, pos)
-    if @node_type == 'tag'
+    # puts "  -- inside set_node: type => #{type}, pos => #{pos} | @node_type: #{@node_type}"
+    if type == 'tag' # @node_type == 'tag'
+      # puts "  -- inside set node: setting vars to nil"
       # set specific tag vars to null
       # type == tag should not be called here
       # see parse_tag for more info
       @tag_name = nil
       @tag_attributes = nil
-      @is_start_tag = nil
-      @is_empty_tag = nil
-      @is_block_element = nil
+      @is_start_tag = false
+      @is_empty_tag = false
+      @is_block_element = false
     end
     @node_type = type
     @node = @html[0, pos]
     @html = @html[pos, @html.size-pos]
+    # puts "  -- at end of set_node: @node_type => #{@node_type}, @node => #{@node}"
   end # end set_node
   
   # check if @html begins with a specific string
@@ -381,10 +394,10 @@ class ParseHTML #:nodoc:
     html = ''
     last = true # last tag was block element
     indent_a = []
-    
+
     while (parser.next_node)
       parser.normalize_node if (parser.node_type == 'tag')
-      if (parser.node_type == 'tag' && parser.is_block_element)
+      if ((parser.node_type == 'tag') && parser.is_block_element)
         is_pre_or_code = ['code', 'pre'].include?(parser.tag_name)
         if(!parser.keep_whitespace && !last && !is_pre_or_code)
           html = html.rstrip + "\n"
@@ -393,9 +406,11 @@ class ParseHTML #:nodoc:
           html << indent_a.join(' ')
           if (!parser.is_empty_tag)
             indent_a << indent
+            puts "added to the indent: size => #{indent_a.size}"
           end
         else
           indent_a.pop
+          puts "popped from the indent: size => #{indent_a.size}"
           if (!is_pre_or_code)
             html << indent_a.join(' ')
           end
@@ -426,7 +441,7 @@ class ParseHTML #:nodoc:
     return html
   end
   
-end # end class
+end # end class ParseHTML
 
 class String
   def is_numeric?
