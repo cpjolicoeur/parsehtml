@@ -1,3 +1,5 @@
+require 'yaml'
+
 class ParseHTML #:nodoc:
   
   # tags which are always empty (<br />, etc.)
@@ -253,6 +255,7 @@ class ParseHTML #:nodoc:
     end
     
     # get tag attributes
+    # TODO: in HTML 4 attributes dont need to be quoted
     is_empty_tag = false
     attributes = {}
     curr_attribute = ''
@@ -261,7 +264,7 @@ class ParseHTML #:nodoc:
       # close tag
       if (@html[pos,1] == '>' || @html[pos,2] == '/>')
         if (@html[pos,1] == '/')
-          @is_empty_tag = true
+          is_empty_tag = true
           pos += 1
         end
         break 
@@ -396,6 +399,7 @@ class ParseHTML #:nodoc:
     indent_a = []
 
     while (parser.next_node)
+      puts "parser: #{parser.to_yaml}"
       parser.normalize_node if (parser.node_type == 'tag')
       if ((parser.node_type == 'tag') && parser.is_block_element)
         is_pre_or_code = ['code', 'pre'].include?(parser.tag_name)
