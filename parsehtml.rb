@@ -149,19 +149,15 @@ class ParseHTML #:nodoc:
   
   # get next node
   def next_node
-    # puts "\n\n* loop: #{@loop}"
     return false if (@html.nil? || @html.empty?)
 
     skip_whitespace = true
-    # puts "  in next node - tag_name: #{@tag_name}"
     if (@is_start_tag && !@is_empty_tag)
       @open_tags << @tag_name
       @keep_whitespace += 1 if PREFORMATTED_TAGS.include?(@tag_name)
     end
     
     if (@html[0,1] == '<')
-      # puts "  new token: #{html[0,9]}"
-      # puts "  open tags: #{@open_tags}"
       token = html[0,9]
       if (token[0,2] == '<?')
         # xml, prolog, or other pi's
@@ -204,7 +200,6 @@ class ParseHTML #:nodoc:
         return true
       end # end cdata
       if (parse_tag)
-        # puts "  After parse tag =>tag_name: #{@tag_name}, start_tag: #{@is_start_tag}, empty_tag: #{@is_empty_tag}"
         # seems to be a tag so handle whitespaces
         @skip_whitespace = @is_block_element
       end # end parse_tag
@@ -321,7 +316,6 @@ class ParseHTML #:nodoc:
     @node = @html[0,pos]
     @html = @html[pos, @html.size-pos]
     @tag_name = tag_name
-    # puts "  -- just set @tag_name: #{@tag_name}"
     @tag_attributes = attributes
     @is_start_tag = is_start_tag
     @is_empty_tag = is_empty_tag || EMPTY_TAGS.include?(tag_name)
@@ -337,7 +331,6 @@ class ParseHTML #:nodoc:
   # handle invalid tags
   def invalid_tag
     raise "INVALID TAG"
-    # puts "INVALID TAG: node: #{@node}"
     @html = '&lt;' + @html.slice(1, @html.size - 1)
     return @html
   end
@@ -346,9 +339,7 @@ class ParseHTML #:nodoc:
   # - param type => @nodeType
   # - param pos  => which position to cut at
   def set_node(type, pos)
-    # puts "  -- inside set_node: type => #{type}, pos => #{pos} | @node_type: #{@node_type}"
     if type == 'tag' # @node_type == 'tag'
-      # puts "  -- inside set node: setting vars to nil"
       # set specific tag vars to null
       # type == tag should not be called here
       # see parse_tag for more info
@@ -361,7 +352,6 @@ class ParseHTML #:nodoc:
     @node_type = type
     @node = @html[0, pos]
     @html = @html[pos, @html.size-pos]
-    # puts "  -- at end of set_node: @node_type => #{@node_type}, @node => #{@node}"
   end # end set_node
   
   # check if @html begins with a specific string
@@ -399,7 +389,6 @@ class ParseHTML #:nodoc:
     indent_a = []
 
     while (parser.next_node)
-      puts "parser: #{parser.to_yaml}"
       parser.normalize_node if (parser.node_type == 'tag')
       if ((parser.node_type == 'tag') && parser.is_block_element)
         is_pre_or_code = ['code', 'pre'].include?(parser.tag_name)
@@ -410,11 +399,9 @@ class ParseHTML #:nodoc:
           html << indent_a.join(' ')
           if (!parser.is_empty_tag)
             indent_a << indent
-            puts "added to the indent: size => #{indent_a.size}"
           end
         else
           indent_a.pop
-          puts "popped from the indent: size => #{indent_a.size}"
           if (!is_pre_or_code)
             html << indent_a.join(' ')
           end
