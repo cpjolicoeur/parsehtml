@@ -151,7 +151,7 @@ class ParseHTML #:nodoc:
   def next_node
     return false if (@html.nil? || @html.empty?)
 
-    skip_whitespace = true
+    skip_whitespace = true # FIXME: should probably be a class variable?
     if (@is_start_tag && !@is_empty_tag)
       @open_tags << @tag_name
       @keep_whitespace += 1 if PREFORMATTED_TAGS.include?(@tag_name)
@@ -202,6 +202,7 @@ class ParseHTML #:nodoc:
       if (parse_tag)
         # seems to be a tag so handle whitespaces
         @skip_whitespace = @is_block_element
+        return true
       end # end parse_tag
     end
     
@@ -219,10 +220,14 @@ class ParseHTML #:nodoc:
     return true
   end # end next_node
   
+  private
+  
   # parse tag, set tag name and attributes, check for closing tag, etc...
   def parse_tag
-    a_ord = 'a'[0] # a ascii value
-    z_ord = 'z'[0] # z ascii value
+    a_ord = ?a
+    z_ord = ?z
+    special_ords = [?:, ?-]
+    
     tag_name = ''
     pos = 1
     is_start_tag = (@html[pos,1] != '/')
@@ -232,7 +237,7 @@ class ParseHTML #:nodoc:
     while (@html[pos,1])
       char = @html.downcase[pos,1]
       pos_ord = char[0]
-      if ((pos_ord >= a_ord && pos_ord <= z_ord) || (tag_name.empty? && char.is_numeric?))
+      if ((pos_ord >= a_ord && pos_ord <= z_ord) || (!tag_name.empty? && char.is_numeric?))
         tag_name << char
         pos += 1
       else
@@ -241,13 +246,15 @@ class ParseHTML #:nodoc:
       end
     end # end while
     
-    tag_name = tag_name.downcase
-
+    tag_name.downcase!
+``
     if (tag_name.empty? || !BLOCK_ELEMENTS.include?(tag_name))
       # something went wrong, invalid tag
       invalid_tag
       return false
     end
+    
+    # TODO: add noTagsInCode parsing
     
     # get tag attributes
     # TODO: in HTML 4 attributes dont need to be quoted
