@@ -149,6 +149,7 @@ class ParseHTML #:nodoc:
 
     skip_whitespace = true # FIXME: should probably be a class variable?
     if (@is_start_tag && !@is_empty_tag)
+      puts "pushing onto open tags #{@open_tags}: #{@tag_name}"
       @open_tags << @tag_name
       @keep_whitespace += 1 if PREFORMATTED_TAGS.include?(@tag_name)
     end
@@ -205,8 +206,7 @@ class ParseHTML #:nodoc:
     @skip_whitespace = false if @keep_whitespace
     
     # when we get here it seems to be a text node
-    pos = @html.index('<')
-    pos = @html.size if pos.nil?
+    pos = @html.index('<') || @html.size
     
     set_node('text', pos)
     handle_whitespaces
@@ -222,7 +222,7 @@ class ParseHTML #:nodoc:
   def parse_tag
     a_ord = ?a
     z_ord = ?z
-    special_ords = [?:, ?-]
+    special_ords = [?:, ?-] # for xml:lang and http-equiv
     
     tag_name = ''
     pos = 1
@@ -310,6 +310,7 @@ class ParseHTML #:nodoc:
         invalid_tag
         return false
       end
+      puts "popping open tags: #{@open_tags}"
       @open_tags.pop
       if (PREFORMATTED_TAGS.include?(tag_name))
         @keep_whitespace -= 1
@@ -371,13 +372,13 @@ class ParseHTML #:nodoc:
   # normalize self::node
   def normalize_node
     @node = '<'
-    if (@is_start_tag)
+    unless (@is_start_tag)
       @node << "/#{@tag_name}>"
       return
     end
     @node << @tag_name
     @tag_attributes.each do |name, value|
-      str = ' ' + name + '="' + value.gsub(/\"/, '&quot;') + '"'
+      str = " #{name}=\"" + value.gsub(/\"/, '&quot;') + "\""
       @node << str
     end
     @node << ' /' if (@is_empty_tag)
