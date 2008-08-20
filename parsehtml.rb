@@ -101,39 +101,31 @@ class ParseHTML #:nodoc:
   # - comment
   # - doctype
   # - pi (processing instruction)
-  @node_type = ''
   attr_accessor :node_type
   
   # current node context
   # - either a simple string (text node) or something like
   # - <tag attrib="value"...>
-  @node = ''
   attr_accessor :node
   
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
   # - NOTE: empty tags (<br />) set this to true as well!
-  @is_start_tag = false
   attr_reader :is_start_tag
   
   # whether current node is an empty tag (<br />) or not (<a></a>)
-  @is_empty_tag = false
   attr_reader :is_empty_tag
   
   # tag name
-  @tag_name = ''
   attr_reader :tag_name
   
   # attributes of current_tag (in hash)
-  @tag_attributes = nil
   attr_reader :tag_attributes
   
   # whether the current tag is a block level element
-  @is_block_element = false
   attr_reader :is_block_element
   
   # keep whitespace formatting
-  @keep_whitespace = 0
   attr_reader :keep_whitespace
   
   # list of open tags (array)
@@ -144,6 +136,10 @@ class ParseHTML #:nodoc:
   def initialize(html = '')
     @html = html
     @open_tags = []
+    @node_type, @node, @tag_name = '', '', ''
+    @is_start_tag, @is_empty_tag, @is_block_element = false, false, false
+    @tag_attributes = nil
+    @keep_whitespace = 0
     @loop = 1
   end
   
