@@ -112,7 +112,7 @@ class ParseHTML #:nodoc:
   attr_reader :node
   
   # supress HTML tags inside preformatted tags
-  attr_reader :no_tags_in_code
+  attr_accessor :no_tags_in_code
   
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
@@ -394,8 +394,9 @@ class ParseHTML #:nodoc:
   end
   
   # indent HTML properly
-  def self.indent_html(html, indent = '  ')
+  def self.indent_html(html, indent = '  ', no_tags_in_code = false)
     parser = ParseHTML.new(html)
+    parser.no_tags_in_code = no_tags_in_code
     html = ''
     last = true # last tag was block element
     indent_a = []
@@ -404,7 +405,7 @@ class ParseHTML #:nodoc:
       parser.normalize_node if (parser.node_type == 'tag')
       if ((parser.node_type == 'tag') && parser.is_block_element)
         is_pre_or_code = ['code', 'pre'].include?(parser.tag_name)
-        if(!parser.keep_whitespace && !last && !is_pre_or_code)
+        if(parser.keep_whitespace.zero? && !last && !is_pre_or_code)
           html = html.rstrip + "\n"
         end
         if (parser.is_start_tag)
@@ -419,7 +420,7 @@ class ParseHTML #:nodoc:
           end
         end
         html << parser.node
-        if (!parser.keep_whitespace && !(is_pre_or_code && parser.is_start_tag))
+        if (parser.keep_whitespace.zero? && !(is_pre_or_code && parser.is_start_tag))
           html << "\n"
         end
         last = true
@@ -427,8 +428,8 @@ class ParseHTML #:nodoc:
         if (parser.node_type == 'tag' && parser.tag_name == 'br')
           html << (parser.node + "\n")
           last = true
-          continue
-        elsif (last && !parser.keep_whitespace)
+          next
+        elsif (last && parser.keep_whitespace.zero?)
           html << indent_a.join(' ')
           parser.node = parser.node.lstrip
         end
