@@ -1,39 +1,36 @@
-= parseHTML is an HTML parser which works with Ruby 1.8 and above.
+# ParseHTML
 
-== What it is
+ParseHTML is an HTML parser which works with Ruby 1.8 and above.  ParseHTML will even try to handle invalid HTML to some degree
 
-parseHTML will parse HTML in Ruby and even tries to handle invalid HTML to some degree
+## Requirements
 
+* Ruby 1.8 or above.
 
-== Requirements
+## Installation
 
-All you need is Ruby 1.8 or above.
+Grab the source: http://github.com/cpjolicoeur/parsehtml
 
-== Get it
+To install as a gem: coming soon
 
-Available as a gem on GitHub: coming soon
+## Usage
 
-Or download gem from: coming soon
+`require 'parsehtml'`
 
-Or get the source: http://github.com/cpjolicoeur/parsehtml
+`html = "<h1>This is my HTML code</h1>\n\n<p>Pass this <b>directly</b> into the parser</p>"`
 
+Create a new parser object: 
 
-== Features
+`parser = ParseHTML.new(html)`
 
-== Usage
+Traverse through the HTML nodes:
 
-== Get Help
+`parser.next_node`
 
-Feel free to contact me, or peruse the homepage.
+## Developers
 
- * http://craigjolicoeur.com/parsehtml/
- * http://github.com/cpjolicoeur/parsehtml/
+* [Craig P Jolicoeur](http://craigjolicoeur.com) - http://github.com/cpjolicoeur
 
-== Acknowledgments
-
-parseHTML is heavily based on the parseHTML PHP library written by Milian Wolf (http://milianw.de).
-
-== License
+## License
 
 MIT License
 
@@ -56,3 +53,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## Acknowledgments
+
+ParseHTML is heavily based on the ParseHTML PHP library written by Milian Wolf (http://milianw.de).
