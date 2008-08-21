@@ -240,7 +240,6 @@ class ParseHTML #:nodoc:
     end # end while
     
     tag_name.downcase!
-``
     if (tag_name.empty? || !BLOCK_ELEMENTS.include?(tag_name))
       # something went wrong, invalid tag
       invalid_tag
@@ -330,9 +329,7 @@ class ParseHTML #:nodoc:
   
   # handle invalid tags
   def invalid_tag
-    raise "INVALID TAG"
     @html = '&lt;' + @html.slice(1, @html.size - 1)
-    return @html
   end
   
   # update all variables and make @html shorter
