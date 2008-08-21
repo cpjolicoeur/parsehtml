@@ -143,7 +143,7 @@ class ParseHTML #:nodoc:
     @html = html
     @open_tags = []
     @node_type, @node, @tag_name = '', '', ''
-    @is_start_tag, @is_empty_tag, @is_block_element = false, false, false
+    @is_start_tag, @is_empty_tag, @is_block_element, @no_tags_in_code = false, false, false, false
     @tag_attributes = nil
     @keep_whitespace = 0
   end
@@ -252,7 +252,11 @@ class ParseHTML #:nodoc:
       return false
     end
     
-    # TODO: add noTagsInCode parsing
+    if (@no_tags_in_code && @open_tags.last == 'code' && !(tag_name == 'code' && !is_start_tag))
+      # supress all HTML tags inside code tags
+      invalid_tag
+      return false
+    end
     
     # get tag attributes
     # TODO: in HTML 4 attributes dont need to be quoted
