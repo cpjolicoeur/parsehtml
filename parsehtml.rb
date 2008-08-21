@@ -343,7 +343,7 @@ class ParseHTML #:nodoc:
   # - param type => @nodeType
   # - param pos  => which position to cut at
   def set_node(type, pos)
-    if type == 'tag' # @node_type == 'tag'
+    if (type == 'tag') # @node_type == 'tag'
       # set specific tag vars to null
       # type == tag should not be called here
       # see parse_tag for more info
@@ -369,7 +369,7 @@ class ParseHTML #:nodoc:
     @node.gsub!(/\s+/, ' ')
   end
   
-  # normalize self::node
+  # normalize self.node
   def normalize_node
     @node = '<'
     unless (@is_start_tag)
