@@ -1,5 +1,3 @@
-require 'yaml'
-
 class ParseHTML #:nodoc:
   
   # tags which are always empty (<br />, etc.)
@@ -149,7 +147,6 @@ class ParseHTML #:nodoc:
 
     skip_whitespace = true # FIXME: should probably be a class variable?
     if (@is_start_tag && !@is_empty_tag)
-      puts "pushing onto open tags #{@open_tags}: #{@tag_name}"
       @open_tags << @tag_name
       @keep_whitespace += 1 if PREFORMATTED_TAGS.include?(@tag_name)
     end
@@ -167,7 +164,7 @@ class ParseHTML #:nodoc:
         # HTML comment
         pos = @html.index('-->')
         if pos.nil?
-          # could not find a closing -->, use next < tag instead
+          # could not find a closing -->, use next gt tag instead
           # this is what firefox does with its parsing
           pos = @html.index('>') + 1
         else
@@ -198,20 +195,20 @@ class ParseHTML #:nodoc:
       end # end cdata
       if (parse_tag)
         # seems to be a tag so handle whitespaces
-        @skip_whitespace = @is_block_element
+        skip_whitespace = @is_block_element ? true : false
         return true
       end # end parse_tag
     end
     
-    @skip_whitespace = false if @keep_whitespace
+    skip_whitespace = false if @keep_whitespace
     
     # when we get here it seems to be a text node
     pos = @html.index('<') || @html.size
     
     set_node('text', pos)
     handle_whitespaces
-    return next_node if (@skip_whitespace && @node == ' ')
-    @skip_whitespace = false
+    return next_node if (skip_whitespace && @node == ' ')
+    skip_whitespace = false
     @loop += 1
     return true
   end # end next_node
@@ -310,7 +307,6 @@ class ParseHTML #:nodoc:
         invalid_tag
         return false
       end
-      puts "popping open tags: #{@open_tags}"
       @open_tags.pop
       if (PREFORMATTED_TAGS.include?(tag_name))
         @keep_whitespace -= 1
@@ -343,7 +339,7 @@ class ParseHTML #:nodoc:
   # - param type => @nodeType
   # - param pos  => which position to cut at
   def set_node(type, pos)
-    if (type == 'tag') # @node_type == 'tag'
+    if (@node_type == 'tag') # (type == 'tag')
       # set specific tag vars to null
       # type == tag should not be called here
       # see parse_tag for more info
