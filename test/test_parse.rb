@@ -1,9 +1,7 @@
 # test_parse.rb
-# May 22, 2008
-#
+# Aug 20, 2008
 
 $:.unshift File.join(File.dirname(__FILE__),'..','lib')
-
 require 'parsehtml'
 
 @html = '<p>Simple block on one line:</p>
@@ -37,5 +35,6 @@ foo
 </div>
 </div>'
 puts ParseHTML.indent_html(@html);
+
 @html = '<a href="asdfasdf"       title=\'asdf\' foo="bar">asdf</a>';
 puts ParseHTML.indent_html(@html);
