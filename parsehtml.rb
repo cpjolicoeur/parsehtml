@@ -109,7 +109,7 @@ class ParseHTML #:nodoc:
   # current node context
   # - either a simple string (text node) or something like
   # - <tag attrib="value"...>
-  attr_reader :node
+  attr_accessor :node
   
   # supress HTML tags inside preformatted tags
   attr_accessor :no_tags_in_code
@@ -218,6 +218,22 @@ class ParseHTML #:nodoc:
     skip_whitespace = false
     return true
   end # end next_node
+  
+  # normalize self.node
+  def normalize_node
+    @node = '<'
+    unless (@is_start_tag)
+      @node << "/#{@tag_name}>"
+      return
+    end
+    @node << @tag_name
+    @tag_attributes.each do |name, value|
+      str = " #{name}=\"" + value.gsub(/\"/, '&quot;') + "\""
+      @node << str
+    end
+    @node << ' /' if (@is_empty_tag)
+    @node << '>'
+  end
   
   private
   
@@ -370,22 +386,6 @@ class ParseHTML #:nodoc:
   def handle_whitespaces
     return if (@keep_whitespace.nil? || @keep_whitespace.zero?)
     @node.gsub!(/\s+/, ' ')
-  end
-  
-  # normalize self.node
-  def normalize_node
-    @node = '<'
-    unless (@is_start_tag)
-      @node << "/#{@tag_name}>"
-      return
-    end
-    @node << @tag_name
-    @tag_attributes.each do |name, value|
-      str = " #{name}=\"" + value.gsub(/\"/, '&quot;') + "\""
-      @node << str
-    end
-    @node << ' /' if (@is_empty_tag)
-    @node << '>'
   end
   
   # check if a string is a valid numeric value

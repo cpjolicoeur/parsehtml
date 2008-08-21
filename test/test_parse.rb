@@ -36,5 +36,6 @@ foo
 foo
 </div>
 </div>'
-#$html = '<a href="asdfasdf"       title=\'asdf\' foo="bar">asdf</a>';
+puts ParseHTML.indent_html(@html);
+@html = '<a href="asdfasdf"       title=\'asdf\' foo="bar">asdf</a>';
 puts ParseHTML.indent_html(@html);
