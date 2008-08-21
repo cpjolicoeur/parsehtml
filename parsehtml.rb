@@ -1,7 +1,7 @@
 class ParseHTML #:nodoc:
   
   # tags which are always empty (<br />, etc.)
-  EMPTY_TAGS = %w(br hr input img)
+  EMPTY_TAGS = %w(br hr input img area link meta param)
   
   # tags with preformatted text - whitespace won't be touched in them
   PREFORMATTED_TAGS = %w(script style pre code)
@@ -49,8 +49,15 @@ class ParseHTML #:nodoc:
                 		'body' => true,
                 		'head' => true,
                 		'meta' => true,
+                		'link' => true,
                 		'style' => true,
                 		'title' => true,
+                		# media tags to render as block
+                		'map' => true,
+                		'object' => true,
+                		'param' => true,
+                		'embed' => true,
+                		'area' => true,
                 		# inline elements
                 		'a' => false,
                 		'abbr' => false,
@@ -75,8 +82,6 @@ class ParseHTML #:nodoc:
                 		'iframe' => false,
                 		'kbd' => false,
                 		'label' => false,
-                		'map' => false,
-                		'object' => false,
                 		'q' => false,
                 		'samp' => false,
                 		'script' => false,
@@ -99,12 +104,15 @@ class ParseHTML #:nodoc:
   # - comment
   # - doctype
   # - pi (processing instruction)
-  attr_accessor :node_type
+  attr_reader :node_type
   
   # current node context
   # - either a simple string (text node) or something like
   # - <tag attrib="value"...>
-  attr_accessor :node
+  attr_reader :node
+  
+  # supress HTML tags inside preformatted tags
+  attr_reader :no_tags_in_code
   
   # whether the current node is an opening tag (<a>) or not (</a>)
   # - set to nil if current node is not a tag
@@ -114,21 +122,21 @@ class ParseHTML #:nodoc:
   # whether current node is an empty tag (<br />) or not (<a></a>)
   attr_reader :is_empty_tag
   
+  # whether the current tag is a block level element
+  attr_reader :is_block_element
+  
   # tag name
   attr_reader :tag_name
   
   # attributes of current_tag (in hash)
   attr_reader :tag_attributes
   
-  # whether the current tag is a block level element
-  attr_reader :is_block_element
-  
   # keep whitespace formatting
   attr_reader :keep_whitespace
   
   # list of open tags (array)
   # - count this to get current depth
-  attr_accessor :open_tags
+  attr_reader :open_tags
   
 
   def initialize(html = '')
