@@ -1,3 +1,7 @@
+#
+# Version 1.12 - Aug 20, 2008
+#
+
 class ParseHTML #:nodoc:
   
   # tags which are always empty (<br />, etc.)
