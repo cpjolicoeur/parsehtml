@@ -138,7 +138,6 @@ class ParseHTML #:nodoc:
     @is_start_tag, @is_empty_tag, @is_block_element = false, false, false
     @tag_attributes = nil
     @keep_whitespace = 0
-    @loop = 1
   end
   
   # get next node
@@ -209,7 +208,6 @@ class ParseHTML #:nodoc:
     handle_whitespaces
     return next_node if (skip_whitespace && @node == ' ')
     skip_whitespace = false
-    @loop += 1
     return true
   end # end next_node
   
