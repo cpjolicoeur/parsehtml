@@ -230,7 +230,7 @@ class ParseHTML #:nodoc:
     while (@html[pos,1])
       char = @html.downcase[pos,1]
       pos_ord = char[0]
-      if ((pos_ord >= a_ord && pos_ord <= z_ord) || (!tag_name.empty? && char.is_numeric?))
+      if ((pos_ord >= a_ord && pos_ord <= z_ord) || (!tag_name.empty? && is_numeric?(char)))
         tag_name << char
         pos += 1
       else
@@ -378,6 +378,11 @@ class ParseHTML #:nodoc:
     @node << '>'
   end
   
+  # check if a string is a valid numeric value
+  def is_numeric?(val)
+    Float val rescue false
+  end
+  
   # indent HTML properly
   def self.indent_html(html, indent = '  ')
     parser = ParseHTML.new(html)
@@ -430,9 +435,3 @@ class ParseHTML #:nodoc:
   end
   
 end # end class ParseHTML
-
-class String
-  def is_numeric?
-    Float self rescue false
-  end
-end
