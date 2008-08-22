@@ -1,6 +1,6 @@
 # ParseHTML
 
-ParseHTML is an HTML parser which works with Ruby 1.8 and above.  ParseHTML will even try to handle invalid HTML to some degree
+ParseHTML is an HTML parser which works with Ruby 1.8 and above.  ParseHTML will even try to handle invalid HTML to some degree.
 
 ## Requirements
 
@@ -56,4 +56,4 @@ THE SOFTWARE.
 
 ## Acknowledgments
 
-ParseHTML is heavily based on the ParseHTML PHP library written by Milian Wolf (http://milianw.de).
+ParseHTML is heavily based on the ParseHTML PHP library written by [Milian Wolf](http://milianw.de).
