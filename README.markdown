@@ -14,8 +14,8 @@ To install as a gem: coming soon
 
 ## Usage
 
-  require 'parsehtml'
-  html = "<h1>This is my HTML code</h1>\n\n<p>Pass this <b>directly</b> into the parser</p>"
+    require 'parsehtml'
+    html = "<h1>This is my HTML code</h1>\n\n<p>Pass this <b>directly</b> into the parser</p>"
 
 Create a new parser object: 
 
