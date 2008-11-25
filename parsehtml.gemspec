@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.description = "ParseHTML is an HTML parser which works with Ruby 1.8 and above. ParseHTML will even try to handle invalid HTML to some degree."
   s.has_rdoc = true
   s.authors = ["Craig P Jolicoeur"]
-  s.files = FileList['lib/*.rb', 'test/*'].to_a
-  s.test_files = FileList['test/*'].to_a 
+  s.files = ['lib/parsehtml.rb', 'test/test_parse.rb', 'README.markdown']
+  s.test_files = ['test/test_parse.rb']
 end
