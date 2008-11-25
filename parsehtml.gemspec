@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "parsehtml"
   s.version = "0.5.1"
-  s.date = "2008-11-25"
+  s.date = "2008-11-24"
   s.summary = "ParseHTML is an HTML parser which works with Ruby 1.8 and above."
   s.email = "cpjolicoeur@gmail.com"
   s.homepage = "http://github.com/cpjolicoeur/parsehtml"
