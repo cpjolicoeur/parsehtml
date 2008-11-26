@@ -16,16 +16,16 @@ To install as a gem: coming soon
 
     require 'parsehtml'
     html = "<h1>This is my HTML code</h1>\n\n<p>Pass this <b>directly</b> into the parser</p>"
-    parser = ParseHTML.new(html)  \# Create a new parser object
-    parser.next_node              \# traverse through the HTML nodes
-    parser.node                   \# gives the current node (<h1>)
-    parser.node_type              \# gives the node type (tag)
-    parser.open_tags              \# lists any open tags ([])
-    parser.tag_name               \# gives the DOM tag name (h1)
-    parser.is_block_element       \# is this a block element? (true)
-    parser.is_empty_tag           \# is this an empty tag? (false)
-    parser.is_start_tag           \# is this a start tag? (true)
-    parser.tag_attributes         \# lists the current tags attributes ({})
+    parser = ParseHTML.new(html)  # Create a new parser object
+    parser.next_node              # traverse through the HTML nodes
+    parser.node                   # gives the current node (<h1>)
+    parser.node_type              # gives the node type (tag)
+    parser.open_tags              # lists any open tags ([])
+    parser.tag_name               # gives the DOM tag name (h1)
+    parser.is_block_element       # is this a block element? (true)
+    parser.is_empty_tag           # is this an empty tag? (false)
+    parser.is_start_tag           # is this a start tag? (true)
+    parser.tag_attributes         # lists the current tags attributes ({})
 
 ## Developers
 
