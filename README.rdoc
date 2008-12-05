@@ -12,7 +12,13 @@ Ruby 1.8
 
 == INSTALL:
 
+As a gem:
+  
   sudo gem install parsehtml
+
+Or as a plugin:
+
+  script/plugin install git://github.com/cpjolicoeur/parsehtml.git
 
 == USAGE:
 
