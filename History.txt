@@ -1,0 +1,4 @@
+== 1.12.0 2008-12-05
+
+* No major enhancements
+  * Just changing the gem server from github to rubyforge

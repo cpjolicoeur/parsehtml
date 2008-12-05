@@ -1,0 +1,2 @@
+
+For more information on parsehtml, see http://parsehtml.rubyforge.org
