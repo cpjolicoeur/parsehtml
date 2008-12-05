@@ -5,10 +5,6 @@ README.rdoc
 Rakefile
 config/website.yml
 lib/parsehtml.rb
-script/console
-script/destroy
-script/generate
-script/txt2html
 test/test_helper.rb
 test/test_parsehtml.rb
 test/test_parse.rb
