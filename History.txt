@@ -1,3 +1,8 @@
+== 1.12.2 2008-12-05
+
+* Minor updates
+  * Updated README and package manifest
+
 == 1.12.1 2008-12-05
 
 * Minor updates
