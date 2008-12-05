@@ -449,8 +449,4 @@ class ParseHTML
     return html
   end
   
-<<<<<<< HEAD:lib/parsehtml.rb
 end # end class ParseHTML
-=======
-end # end class ParseHTML
->>>>>>> origin/master:lib/parsehtml.rb
