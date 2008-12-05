@@ -2,7 +2,7 @@ $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 class ParseHTML
-  VERSION = '1.12.0'
+  VERSION = '1.12.1'
   
   # tags which are always empty (<br />, etc.)
   EMPTY_TAGS = %w(br hr input img area link meta param)
