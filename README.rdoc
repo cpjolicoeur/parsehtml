@@ -2,6 +2,12 @@
 
 http://parsehtml.rubyforge.org
 
+== IMPORTANT NOTICE:
+
+ParseHTML is currently undergoing a MAJOR rewrite.  First of all, the current version was written in 2005 as one of my very first Ruby projects and it shows. The code is pretty much a line for line port of the PHP library with the same name.  Now that I actually know how to code in Ruby (a bit) I'm rewriting the codebase to make it in more of a Ruby fashion.  The current version works perfectly fine and is usable, but beware that I do realize the code isn't the best.
+
+Secondly, calling ParseHTML an HTML parser is a bit of a misnomer in the tradition of parsers that most are used to.  ParseHTML doesn't work in the same manner that Hpricot or libxml do.  ParseHTML is actually more of an HTML "traverser."  ParseHTML will traverse and HTML document node by node from start to finish.
+
 == DESCRIPTION:
 
 ParseHTML is an HTML parser which works with Ruby 1.8 and above.  ParseHTML will even try to handle invalid HTML to some degree.
